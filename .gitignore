@@ -1,2 +1,5 @@
 *.crt
 *.key
+*.tar.gz
+munge-0.5.15
+mariadb*

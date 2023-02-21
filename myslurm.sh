@@ -10,24 +10,30 @@ fi
 
 # Hardcoded info ==============================================
 # You may change this one to yours
-MYSLURM_ROOT=${HOME}/install_mn/slurm
 MYSLURM_USER=${USER}
-MYSLURM_DBD_PORT=7101
+MYSLURM_DBD_PORT=8101
 
 MYSLURM_TMP=/tmp/${USER}
+#echo $MYSLURM_TMP
 
 rm -rf ${MYSLURM_TMP}
 mkdir ${MYSLURM_TMP}
 
-MARIADB_ROOT=${HOME}/install_mn/mariadb
-MARIADB_PORT=7100
+MARIADB_PORT=8100
 MYSQL_UNIX_PORT=${MYSLURM_TMP}/mysql.sock
 
-MUNGE_ROOT=${HOME}/install_mn/munge
+export MYSQL_UNIX_PORT
+export MARIADB_ROOT=${HOME}/JimmySlurmInSlurm/mariadb-10.6.8-linux-systemd-x86_64
+export LD_LIBRARY_PATH=${MARIADB_ROOT}/lib:$LD_LIBRARY_PATH
+export PATH=${MARIADB_ROOT}/bin:${MARIADB_ROOT}/scripts:$PATH
+export MYSLURM_ROOT=${HOME}/apps/install/slurm-21.08
+export MYSLURM_CONF=${HOME}/slurm-confdir-21.08
+export MUNGE_ROOT=${HOME}/apps/install/munge
+
 MUNGE_STATEDIR=${MYSLURM_TMP}/munge
 
 # MPICH
-MYMPICH_ROOT=${HOME}/install_mn/mpich_myslurm
+MYMPICH_ROOT=${HOME}/apps/install/mpich-3.2
 
 # Get system info ====================================================
 MYSLURM_MASTER=$(hostname)                     # Master node
@@ -46,7 +52,7 @@ if ((MYSLURM_NSLAVES == 0)); then
 fi
 
 # Create and clean directories and database ==========================
-MYSLURM_CONF_DIR=${MYSLURM_ROOT}/slurm-confdir
+MYSLURM_CONF_DIR=${MYSLURM_CONF}
 [[ -d "${MYSLURM_CONF_DIR}" ]] || mkdir ${MYSLURM_CONF_DIR}
 
 MYSLURM_VAR_DIR=${MYSLURM_CONF_DIR}/var
@@ -68,6 +74,7 @@ rm -rf ${MARIADB_DATA} && mkdir ${MARIADB_DATA}
 rm -rf ${MYSQL_UNIX_PORT}
 
 # Create storage
+echo "mysql_install_db --verbose --datadir=${MARIADB_DATA} --basedir=${MARIADB_ROOT} --user=${MYSLURM_USER} --port=${MARIADB_PORT}" 
 mysql_install_db --verbose \
 				 --datadir=${MARIADB_DATA} \
 				 --basedir=${MARIADB_ROOT} \
@@ -75,6 +82,7 @@ mysql_install_db --verbose \
 				 --port=${MARIADB_PORT}
 
 # Start server
+echo "mysqld_safe --verbose --datadir=${MARIADB_DATA} --basedir=${MYSLURM_ROOT} --user=${MYSLURM_USER} --port=${MARIADB_PORT} &"
 mysqld_safe --verbose \
 			--datadir=${MARIADB_DATA} \
 			--basedir=${MYSLURM_ROOT} \
@@ -82,6 +90,7 @@ mysqld_safe --verbose \
 			--port=${MARIADB_PORT} &
 
 # Start server
+#echo $MYSQL_UNIX_PORT
 while ! [[ -S ${MYSQL_UNIX_PORT} ]] ; do
   echo "# Waiting mysql socket: ${MYSQL_UNIX_PORT}"
   sleep 1
