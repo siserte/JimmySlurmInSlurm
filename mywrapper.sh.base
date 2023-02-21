@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright (C) 2022  Jimmy Aguilar Mena
 
 # This program is free software: you can redistribute it and/or modify
@@ -23,12 +24,15 @@ mkdir -p @MUNGE_STATEDIR@/var @MUNGE_STATEDIR@/{lib,log,run}/munge
 SLURM_CONF=@MYSLURM_CONF_DIR@/slurm.conf
 
 if [[ $(hostname) == @MYSLURM_MASTER@ ]]; then
-	# MariaDB
+	echo "# Master: $(hostname) $(taskset -c -p $$)"
+
 	@MYSLURM_ROOT@/sbin/slurmdbd -Dv &    # Slurmdb server
 
 	sleep 5 # Time to create the socket
 
 	@MYSLURM_ROOT@/sbin/slurmctld -cDvi  # Slurm server
 else
+	echo "# Slave: ${PMI_RANK} $(hostname) $(taskset -c -p $$)"
+
 	@MYSLURM_ROOT@/sbin/slurmd -cDv
 fi
