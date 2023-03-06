@@ -3,9 +3,9 @@ Cosas a tener en cuenta: configure con el flag --allowJobResize. Configurar con 
 Readme
 ======
 
-Simple scripts generator to run a nested slurm inside another slurm
-cluster.  This script basically gathers all the system's information
+Simple scripts generator to run a nested slurm inside Marenostrum IV slurm's.  This script basically gathers all the system's information
 and starts a slurm server-clients to be used as a separated instance.
+
 
 Previous installation
 ---------------------
