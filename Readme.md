@@ -1,4 +1,3 @@
-Cosas a tener en cuenta: configure con el flag --allowJobResize. Configurar con Munge y con MariaDB
 
 Readme
 ======
